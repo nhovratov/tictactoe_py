@@ -7,13 +7,15 @@ from pygame.locals import *
 
 FPS = 30
 WINDOWWIDTH = 645
-
 PADDING = 25
+
+# Grid
 GRIDSIZE = int(WINDOWWIDTH * 2/5)
 WINDOWHEIGHT = int(2 * PADDING + GRIDSIZE)
 CELLSIZE = int(GRIDSIZE / 3)
 GRIDRECT = (PADDING, PADDING)
 
+# UI
 UISIZE = int(WINDOWWIDTH - GRIDSIZE - 3 * PADDING)
 UIRECT = (GRIDSIZE + 2 * PADDING, PADDING)
 
@@ -23,6 +25,7 @@ WHITE =   (255, 255, 255)
 BLACK =   (0,   0,   0)
 BLUE  =   (0,   0,   255)
 
+# Text Margin
 MARGIN = 35
 MARGINBIG = 45
 
@@ -33,11 +36,11 @@ POSO = (2 * PADDING + GRIDSIZE + LETTERSIZE + PADDING, PADDING + MARGINBIG + MAR
 SIZEX = (LETTERSIZE, LETTERSIZE)
 SIZEO = (LETTERSIZE, LETTERSIZE)
 
+# X and O sprites
 imageX = pygame.image.load("x.png")
 imageX = pygame.transform.scale(imageX, (LETTERSIZE, LETTERSIZE))
 imageO = pygame.image.load("o.png")
 imageO = pygame.transform.scale(imageO, (LETTERSIZE, LETTERSIZE))
-
 
 def main():
     # Define globals
@@ -114,16 +117,12 @@ def playerLetterChoice():
         FPSCLOCK.tick(FPS)
 
 def runGame(playerLetter, computerLetter, turn):
-    print("run the game")
-    # Reset the board
     theBoard = []
     for i in range(3):
         theBoard.append([' '] * 3)
-    print(theBoard)
-    gameIsPlaying = True
-    
-    while gameIsPlaying: # game loop
 
+    gameIsPlaying = True    
+    while gameIsPlaying:
         if turn == 'player':
             playerDecidesMove = True
             while playerDecidesMove:
@@ -143,16 +142,29 @@ def runGame(playerLetter, computerLetter, turn):
                             makeMove(theBoard, playerLetter, cellClicked)
                             updateGrid(theBoard)
                             print(theBoard)
+                            if isWinner(theBoard, playerLetter):
+                                print("Player has won!")
                             turn = 'computer'
                             playerDecidesMove = False
                 FPSCLOCK.tick(FPS)
         else:
+            # computerMove(theBoard, computerLetter)
             print("Computer turn")
             print("Computer makes turn")
             turn = 'player'
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+
+def isWinner(bo, le):
+    return ((bo[0][0] == le and bo[1][0] == le and bo[2][0] == le) or # across the top
+            (bo[0][1] == le and bo[1][1] == le and bo[2][1] == le) or # across the middle
+            (bo[0][2] == le and bo[1][2] == le and bo[2][2] == le) or # across the bottom
+            (bo[0][0] == le and bo[0][1] == le and bo[0][2] == le) or # down the left side
+            (bo[1][0] == le and bo[1][1] == le and bo[1][2] == le) or # down the middle
+            (bo[2][0] == le and bo[2][1] == le and bo[2][2] == le) or # down the right side
+            (bo[0][0] == le and bo[1][1] == le and bo[2][2] == le) or # diagonal topleft downright
+            (bo[0][2] == le and bo[1][1] == le and bo[2][0] == le)) # diagonal bottomleft topright
 
 def updateGrid(board):
     for row in range(3):
@@ -186,7 +198,6 @@ def printChoiceAndTurn(pLetter, turn):
     turnSurf, turnRect = makeTextObjs(text, BASICFONT)
     turnRect.top = MARGIN
     INTERFACE.blit(turnSurf, turnRect)
-    # Blit Interface with main display again
     DISPLAYSURF.blit(INTERFACE, UIRECT)
 
 def renderInitialText():
