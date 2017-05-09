@@ -5,14 +5,17 @@
 import sys, pygame, random
 from pygame.locals import *
 
-FPS = 20
+FPS = 30
 WINDOWWIDTH = 645
 
 PADDING = 25
 GRIDSIZE = int(WINDOWWIDTH * 2/5)
 WINDOWHEIGHT = int(2 * PADDING + GRIDSIZE)
-UISIZE = int(WINDOWWIDTH - GRIDSIZE - 3 * PADDING)
 CELLSIZE = int(GRIDSIZE / 3)
+GRIDRECT = (PADDING, PADDING)
+
+UISIZE = int(WINDOWWIDTH - GRIDSIZE - 3 * PADDING)
+UIRECT = (GRIDSIZE + 2 * PADDING, PADDING)
 
 #           R    G    B
 GRAY  =   (175, 175, 175)
@@ -29,6 +32,12 @@ POSX = (2 * PADDING + GRIDSIZE, PADDING + MARGINBIG + MARGIN)
 POSO = (2 * PADDING + GRIDSIZE + LETTERSIZE + PADDING, PADDING + MARGINBIG + MARGIN)
 SIZEX = (LETTERSIZE, LETTERSIZE)
 SIZEO = (LETTERSIZE, LETTERSIZE)
+
+imageX = pygame.image.load("x.png")
+imageX = pygame.transform.scale(imageX, (LETTERSIZE, LETTERSIZE))
+imageO = pygame.image.load("o.png")
+imageO = pygame.transform.scale(imageO, (LETTERSIZE, LETTERSIZE))
+
 
 def main():
     # Define globals
@@ -64,8 +73,8 @@ def main():
         drawBoard()
         
         # Merge Surfaces
-        DISPLAYSURF.blit(GRIDSURF, (PADDING, PADDING))
-        DISPLAYSURF.blit(INTERFACE, (GRIDSIZE + 2 * PADDING, PADDING))
+        DISPLAYSURF.blit(GRIDSURF, GRIDRECT)
+        DISPLAYSURF.blit(INTERFACE, UIRECT)
         
         # Update view
         pygame.display.update()
@@ -132,6 +141,7 @@ def runGame(playerLetter, computerLetter, turn):
                     if cellClicked != None:
                         if isSpaceFree(theBoard, cellClicked):
                             makeMove(theBoard, playerLetter, cellClicked)
+                            updateGrid(theBoard)
                             print(theBoard)
                             turn = 'computer'
                             playerDecidesMove = False
@@ -143,6 +153,17 @@ def runGame(playerLetter, computerLetter, turn):
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+
+def updateGrid(board):
+    for row in range(3):
+        for col in range(3):
+            letter = board[row][col]
+            if letter != ' ':
+                if letter == 'X':
+                    imageToBlit = imageX
+                else:
+                    imageToBlit = imageO
+                DISPLAYSURF.blit(imageToBlit, (getDistanceOfCell(row) + 10, getDistanceOfCell(col) + 10))
 
 def isSpaceFree(board, move):
     return board[move[0]][move[1]] == ' '
@@ -166,23 +187,17 @@ def printChoiceAndTurn(pLetter, turn):
     turnRect.top = MARGIN
     INTERFACE.blit(turnSurf, turnRect)
     # Blit Interface with main display again
-    DISPLAYSURF.blit(INTERFACE, (GRIDSIZE + 2 * PADDING, PADDING))
+    DISPLAYSURF.blit(INTERFACE, UIRECT)
 
 def renderInitialText():
     welcomeSurf, welcomeRect = makeTextObjs("Welcome to TicTacToe!", BIGFONT)
-    INTERFACE.blit(welcomeSurf, welcomeRect)
-
     chooseSurf, chooseRect = makeTextObjs("Do you want to be X or O?", BASICFONT)
     chooseRect.top = MARGINBIG
-    INTERFACE.blit(chooseSurf, chooseRect)
-
-    x = pygame.image.load("x.jpg")
-    x = pygame.transform.scale(x, (LETTERSIZE, LETTERSIZE))
-    INTERFACE.blit(x, (0, MARGINBIG + MARGIN))
     
-    o = pygame.image.load("o.jpg")
-    o = pygame.transform.scale(o, (LETTERSIZE, LETTERSIZE))
-    INTERFACE.blit(o, (LETTERSIZE + PADDING, MARGINBIG + MARGIN))
+    INTERFACE.blit(welcomeSurf, welcomeRect)
+    INTERFACE.blit(chooseSurf, chooseRect)
+    INTERFACE.blit(imageX, (0, MARGINBIG + MARGIN))
+    INTERFACE.blit(imageO, (LETTERSIZE + PADDING, MARGINBIG + MARGIN))
 
 def drawBoard():                
     pygame.draw.line(GRIDSURF, WHITE, (CELLSIZE, 0), (CELLSIZE, GRIDSIZE))
@@ -196,10 +211,13 @@ def whoGoesFirst():
          return 'computer'
      else:
          return 'player'
-    
+
+def getDistanceOfCell(coord):
+    return coord * (CELLSIZE + 1) + PADDING
+
 def leftTopCoordsOfCell(row, col):
-    left = row * (CELLSIZE + 1) + PADDING
-    top = col * (CELLSIZE + 1) + PADDING
+    left = getDistanceOfCell(row)
+    top = getDistanceOfCell(col)
     return (left, top)
 
 def getCellAtPixel(x, y):
@@ -208,7 +226,6 @@ def getCellAtPixel(x, y):
             left, top = leftTopCoordsOfCell(row, col)
             cellRect = pygame.Rect(left, top, CELLSIZE, CELLSIZE)
             if cellRect.collidepoint(x, y):
-                print(row, col)
                 return (row, col)
     return None
 
