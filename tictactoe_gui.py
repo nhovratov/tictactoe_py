@@ -5,7 +5,7 @@
 import sys, pygame, random
 from pygame.locals import *
 
-FPS = 10
+FPS = 20
 WINDOWWIDTH = 645
 
 PADDING = 25
@@ -24,7 +24,6 @@ MARGIN = 35
 MARGINBIG = 45
 
 # Letter Selection
-# (need to find a smart way to get positions other than count pixels)
 LETTERSIZE = 65
 POSX = (2 * PADDING + GRIDSIZE, MARGINBIG + MARGIN)
 POSO = (2 * PADDING + GRIDSIZE + LETTERSIZE + PADDING, MARGINBIG + MARGIN)
@@ -32,73 +31,78 @@ SIZEX = (LETTERSIZE, LETTERSIZE)
 SIZEO = (LETTERSIZE, LETTERSIZE)
 
 def main():
-    # setup variables
+    # Define globals
     global FPSCLOCK, DISPLAYSURF, GRIDSURF, INTERFACE, BASICFONT, BIGFONT
     pygame.init()
     
+    # Create Clock
     FPSCLOCK = pygame.time.Clock()
+
+    # Create Surfaces
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
     GRIDSURF = pygame.Surface((GRIDSIZE, GRIDSIZE))
     INTERFACE = pygame.Surface((UISIZE, WINDOWHEIGHT - 2 * PADDING))
+    
+    # Define Fonts
     BASICFONT = pygame.font.SysFont('MonoSpace', 18)
     BIGFONT = pygame.font.SysFont('MonoSpace', 24)
     
     mousex = 0
     mousey = 0
-    
-    letterSelected = False
-    playerLetter = None
-    computerLetter = None
-    turn = whoGoesFirst()
 
-    pygame.display.set_caption('Tic Tac Toe')
+    while True:
+        # Set caption
+        pygame.display.set_caption('Tic Tac Toe')
 
-    # Draw backgrounds
-    DISPLAYSURF.fill(WHITE)
-    GRIDSURF.fill(GRAY)
-    INTERFACE.fill(WHITE)
-    
-    renderInitialText()
-    drawBoard()
-    
-    # Merge Surfaces
-    DISPLAYSURF.blit(GRIDSURF, (PADDING, PADDING))
-    DISPLAYSURF.blit(INTERFACE, (GRIDSIZE + 2 * PADDING, PADDING))
-    
-    # Update view
-    pygame.display.update()
+        # Draw backgrounds
+        DISPLAYSURF.fill(WHITE)
+        GRIDSURF.fill(GRAY)
+        INTERFACE.fill(WHITE)
 
-    while True: # entry loop
+        # Paint
+        renderInitialText()
+        drawBoard()
         
-        while not letterSelected: # wait for player to select letter
-            mouseClicked = False
-            checkForQuit()
-            for event in pygame.event.get():
-                if event.type == MOUSEMOTION:
-                    mousex, mousey = event.pos
-                elif event.type == MOUSEBUTTONUP:
-                    mousex, mousey = event.pos
-                    mouseClicked = True
+        # Merge Surfaces
+        DISPLAYSURF.blit(GRIDSURF, (PADDING, PADDING))
+        DISPLAYSURF.blit(INTERFACE, (GRIDSIZE + 2 * PADDING, PADDING))
+        
+        # Update view
+        pygame.display.update()
 
-            # Onclick
-            if mouseClicked:
-                playerLetter = getLetterAtPixel(mousex, mousey)
-                if playerLetter != None:
-                    if playerLetter == 'X':
-                        computerLetter = 'O'
-                        printChoiceAndTurn(playerLetter, turn)
-                    else:
-                        computerLetter = 'X'
-                        printChoiceAndTurn(playerLetter, turn)
-                        
-                    letterSelected = True
-                    # Update view
-                    pygame.display.update()
-                    FPSCLOCK.tick(FPS)
-                    
+        # Init variables
+        turn = whoGoesFirst()
+        playerLetter, computerLetter = playerLetterChoice()
+
+        printChoiceAndTurn(playerLetter, turn)
+        pygame.display.update()
+        
         # Now the game can start :)
         runGame(playerLetter, computerLetter, turn)
 
+        pygame.display.update()
+        FPSCLOCK.tick(FPS)
+        
+def playerLetterChoice():
+    while True:
+        mouseClicked = False
+        checkForQuit()
+        
+        for event in pygame.event.get():
+            if event.type == MOUSEBUTTONUP:
+                mousex, mousey = event.pos
+                mouseClicked = True
+
+        if mouseClicked:
+            playerLetter = getLetterAtPixel(mousex, mousey)
+            if playerLetter != None:
+                if playerLetter == 'X':
+                    computerLetter = 'O'
+                    return (playerLetter, computerLetter)
+                else:
+                    computerLetter = 'X'
+                    return (playerLetter, computerLetter)
+        FPSCLOCK.tick(FPS)
 
 def runGame(playerLetter, computerLetter, turn):
     print("run the game")
@@ -111,9 +115,8 @@ def runGame(playerLetter, computerLetter, turn):
         if turn == 'player':
             playerChoseCell = False
             
-            while not playerChoseCell: # Player is choosing cell
+            while True:
                 mouseClicked = False
-                # Eventloop
                 checkForQuit();
                 for event in pygame.event.get():
                     if event.type == MOUSEMOTION:
@@ -122,20 +125,20 @@ def runGame(playerLetter, computerLetter, turn):
                         mousex, mousey = event.pos
                         mouseClicked = True
                         
-                # Onclick
                 if mouseClicked:
                     cellClicked = getCellAtPixel(mousex, mousey)
                     if cellClicked != None:
-                        playerChoseCell = True
                         print("player makes turn")
                         turn = 'computer'
+                        break
+                FPSCLOCK.tick(FPS)
         else:
             print("Computer turn")
             print("Computer makes turn")
             turn = 'player'
 
-            pygame.display.update()
-            FPSCLOCK.tick(FPS)
+        pygame.display.update()
+        FPSCLOCK.tick(FPS)
 
 def printChoiceAndTurn(pLetter, turn):
     # Reset Interface
