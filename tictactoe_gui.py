@@ -25,8 +25,8 @@ MARGINBIG = 45
 
 # Letter Selection
 LETTERSIZE = 65
-POSX = (2 * PADDING + GRIDSIZE, MARGINBIG + MARGIN)
-POSO = (2 * PADDING + GRIDSIZE + LETTERSIZE + PADDING, MARGINBIG + MARGIN)
+POSX = (2 * PADDING + GRIDSIZE, PADDING + MARGINBIG + MARGIN)
+POSO = (2 * PADDING + GRIDSIZE + LETTERSIZE + PADDING, PADDING + MARGINBIG + MARGIN)
 SIZEX = (LETTERSIZE, LETTERSIZE)
 SIZEO = (LETTERSIZE, LETTERSIZE)
 
@@ -107,15 +107,17 @@ def playerLetterChoice():
 def runGame(playerLetter, computerLetter, turn):
     print("run the game")
     # Reset the board
-    theBoard = [' '] * 10
+    theBoard = []
+    for i in range(3):
+        theBoard.append([' '] * 3)
+    print(theBoard)
     gameIsPlaying = True
     
     while gameIsPlaying: # game loop
 
         if turn == 'player':
-            playerChoseCell = False
-            
-            while True:
+            playerDecidesMove = True
+            while playerDecidesMove:
                 mouseClicked = False
                 checkForQuit();
                 for event in pygame.event.get():
@@ -128,9 +130,11 @@ def runGame(playerLetter, computerLetter, turn):
                 if mouseClicked:
                     cellClicked = getCellAtPixel(mousex, mousey)
                     if cellClicked != None:
-                        print("player makes turn")
-                        turn = 'computer'
-                        break
+                        if isSpaceFree(theBoard, cellClicked):
+                            makeMove(theBoard, playerLetter, cellClicked)
+                            print(theBoard)
+                            turn = 'computer'
+                            playerDecidesMove = False
                 FPSCLOCK.tick(FPS)
         else:
             print("Computer turn")
@@ -139,6 +143,12 @@ def runGame(playerLetter, computerLetter, turn):
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+
+def isSpaceFree(board, move):
+    return board[move[0]][move[1]] == ' '
+
+def makeMove(board, letter, move):
+    board[move[0]][move[1]] = letter
 
 def printChoiceAndTurn(pLetter, turn):
     # Reset Interface
