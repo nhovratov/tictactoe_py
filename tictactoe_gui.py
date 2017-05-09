@@ -40,8 +40,8 @@ def main():
     DISPLAYSURF = pygame.display.set_mode((WINDOWWIDTH, WINDOWHEIGHT))
     GRIDSURF = pygame.Surface((GRIDSIZE, GRIDSIZE))
     INTERFACE = pygame.Surface((UISIZE, WINDOWHEIGHT - 2 * PADDING))
-    BASICFONT = pygame.font.Font('freesansbold.ttf', 18)
-    BIGFONT = pygame.font.Font('freesansbold.ttf', 26)
+    BASICFONT = pygame.font.SysFont('MonoSpace', 18)
+    BIGFONT = pygame.font.SysFont('MonoSpace', 24)
     
     mousex = 0
     mousey = 0
