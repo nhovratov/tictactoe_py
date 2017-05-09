@@ -25,10 +25,11 @@ MARGINBIG = 45
 
 # Letter Selection
 # (need to find a smart way to get positions other than count pixels)
-POSX = (429, 110)
-POSO = (480, 110)
-SIZEX = (15, 18)
-SIZEO = (20, 17)
+LETTERSIZE = 65
+POSX = (2 * PADDING + GRIDSIZE, MARGINBIG + MARGIN)
+POSO = (2 * PADDING + GRIDSIZE + LETTERSIZE + PADDING, MARGINBIG + MARGIN)
+SIZEX = (LETTERSIZE, LETTERSIZE)
+SIZEO = (LETTERSIZE, LETTERSIZE)
 
 def main():
     # setup variables
@@ -162,10 +163,13 @@ def renderInitialText():
     chooseRect.top = MARGINBIG
     INTERFACE.blit(chooseSurf, chooseRect)
 
-    selectSurf, selectRect = makeTextObjs("X     O", BIGFONT, BLUE)
-    selectRect.top = MARGINBIG + MARGIN
-    selectRect.centerx = UISIZE / 2
-    INTERFACE.blit(selectSurf, selectRect)
+    x = pygame.image.load("x.jpg")
+    x = pygame.transform.scale(x, (LETTERSIZE, LETTERSIZE))
+    INTERFACE.blit(x, (0, MARGINBIG + MARGIN))
+    
+    o = pygame.image.load("o.jpg")
+    o = pygame.transform.scale(o, (LETTERSIZE, LETTERSIZE))
+    INTERFACE.blit(o, (LETTERSIZE + PADDING, MARGINBIG + MARGIN))
 
 def drawBoard():                
     pygame.draw.line(GRIDSURF, WHITE, (CELLSIZE, 0), (CELLSIZE, GRIDSIZE))
