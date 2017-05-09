@@ -139,13 +139,16 @@ def runGame(playerLetter, computerLetter, turn):
                     cellClicked = getCellAtPixel(mousex, mousey)
                     if cellClicked != None:
                         if isSpaceFree(theBoard, cellClicked):
+                            playerDecidesMove = False
                             makeMove(theBoard, playerLetter, cellClicked)
                             updateGrid(theBoard)
-                            print(theBoard)
                             if isWinner(theBoard, playerLetter):
                                 print("Player has won!")
+                                gameIsPlaying = False
+                            if isBoardFull(theBoard):
+                                print("Its a tie!")
+                                gameIsPlaying = False
                             turn = 'computer'
-                            playerDecidesMove = False
                 FPSCLOCK.tick(FPS)
         else:
             # computerMove(theBoard, computerLetter)
@@ -155,6 +158,13 @@ def runGame(playerLetter, computerLetter, turn):
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+
+def isBoardFull(board):
+    for row in range(3):
+        for col in range(3):
+            if isSpaceFree(board, (row, col)):
+                return False
+    return True
 
 def isWinner(bo, le):
     return ((bo[0][0] == le and bo[1][0] == le and bo[2][0] == le) or # across the top
