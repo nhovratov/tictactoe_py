@@ -5,7 +5,7 @@
 import sys, pygame, random
 from pygame.locals import *
 
-FPS = 1
+FPS = 30
 WINDOWWIDTH = 645
 PADDING = 25
 
@@ -138,7 +138,7 @@ def runGame(playerLetter, computerLetter, turn):
                     mousex, mousey = event.pos
                     mouseClicked = True
                     
-            computerMove = getComputerMove(theBoard, computerLetter, turnCount)
+            computerMove = getComputerMove(theBoard, playerLetter, turnCount)
             makeMove(theBoard, playerLetter, computerMove)
             turnCount += 1
             updateGrid(theBoard)
