@@ -15,6 +15,10 @@ WINDOWHEIGHT = int(2 * PADDING + GRIDSIZE)
 CELLSIZE = int(GRIDSIZE / 3)
 GRIDRECT = (PADDING, PADDING)
 
+CORNERS = [(0,0), (0,2), (2,0), (2,2)]
+MIDDLE = (1,1)
+SIDES = [(1,0),(0,1),(2,1),(1,2)]
+
 # UI
 UISIZE = int(WINDOWWIDTH - GRIDSIZE - 3 * PADDING)
 UIRECT = (GRIDSIZE + 2 * PADDING, PADDING)
@@ -121,7 +125,8 @@ def runGame(playerLetter, computerLetter, turn):
     for i in range(3):
         theBoard.append([' '] * 3)
 
-    gameIsPlaying = True    
+    gameIsPlaying = True
+    turnCount = 1
     while gameIsPlaying:
         if turn == 'player':
             playerDecidesMove = True
@@ -141,6 +146,7 @@ def runGame(playerLetter, computerLetter, turn):
                         if isSpaceFree(theBoard, cellClicked):
                             playerDecidesMove = False
                             makeMove(theBoard, playerLetter, cellClicked)
+                            turnCount += 1
                             updateGrid(theBoard)
                             if isWinner(theBoard, playerLetter):
                                 print("Player has won!")
@@ -151,8 +157,9 @@ def runGame(playerLetter, computerLetter, turn):
                             turn = 'computer'
                 FPSCLOCK.tick(FPS)
         else:
-            computerMove = getComputerMove(theBoard, computerLetter)
+            computerMove = getComputerMove(theBoard, computerLetter, turnCount)
             makeMove(theBoard, computerLetter, computerMove)
+            turnCount += 1
             updateGrid(theBoard)
             if isWinner(theBoard, computerLetter):
                 print("computer won")
@@ -171,7 +178,7 @@ def getCopyOfBoard(board):
         copy.append(board[row][:])
     return copy
             
-def getComputerMove(board, computerLetter):
+def getComputerMove(board, computerLetter, turnCount):
     # Given a board and the computer's letter, determine where to move and return that move.
     if computerLetter == 'X':
         playerLetter = 'O'
@@ -194,15 +201,27 @@ def getComputerMove(board, computerLetter):
                 makeMove(copy, playerLetter, (row, col))
                 if isWinner(copy, playerLetter):
                     return (row, col)
+
+    # *1 Had the player the first turn and he sat the corner? Set middle!
+    if turnCount == 2:
+        for corner in CORNERS:
+            if not isSpaceFree(board, corner):
+                return MIDDLE
+    # *2 If the player then sets the opposite corner take a side or else we lose
+    if turnCount == 4 and (
+        (board[0][0] == playerLetter and board[2][2] == playerLetter) or
+        (board[2][0] == playerLetter and board[0][2] == playerLetter)):
+        return chooseRandomMoveFromList(board, SIDES)
+        
     # 3. I try take one of the corners
-    move = chooseRandomMoveFromList(board, [(0,0), (0,2), (2,0), (2,2)])
+    move = chooseRandomMoveFromList(board, CORNERS)
     if move != None:
         return move
     # 4. I try to take the center if its free
-    if isSpaceFree(board, (1,1)):
-        return (1,1)
+    if isSpaceFree(board, MIDDLE):
+        return MIDDLE
     # 5. Move on one of the sides
-    return chooseRandomMoveFromList(board, [(1,0),(0,1),(2,1),(1,2)])
+    return chooseRandomMoveFromList(board, SIDES)
                 
 
 def chooseRandomMoveFromList(board, moveList):
