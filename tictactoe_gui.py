@@ -5,7 +5,7 @@
 import sys, pygame, random
 from pygame.locals import *
 
-FPS = 30
+FPS = 1
 WINDOWWIDTH = 645
 PADDING = 25
 
@@ -129,33 +129,27 @@ def runGame(playerLetter, computerLetter, turn):
     turnCount = 1
     while gameIsPlaying:
         if turn == 'player':
-            playerDecidesMove = True
-            while playerDecidesMove:
-                mouseClicked = False
-                checkForQuit();
-                for event in pygame.event.get():
-                    if event.type == MOUSEMOTION:
-                        mousex, mousey = event.pos
-                    elif event.type == MOUSEBUTTONUP:
-                        mousex, mousey = event.pos
-                        mouseClicked = True
-                        
-                if mouseClicked:
-                    cellClicked = getCellAtPixel(mousex, mousey)
-                    if cellClicked != None:
-                        if isSpaceFree(theBoard, cellClicked):
-                            playerDecidesMove = False
-                            makeMove(theBoard, playerLetter, cellClicked)
-                            turnCount += 1
-                            updateGrid(theBoard)
-                            if isWinner(theBoard, playerLetter):
-                                print("Player has won!")
-                                gameIsPlaying = False
-                            if isBoardFull(theBoard):
-                                print("Its a tie!")
-                                gameIsPlaying = False
-                            turn = 'computer'
-                FPSCLOCK.tick(FPS)
+            mouseClicked = False
+            checkForQuit();
+            for event in pygame.event.get():
+                if event.type == MOUSEMOTION:
+                    mousex, mousey = event.pos
+                elif event.type == MOUSEBUTTONUP:
+                    mousex, mousey = event.pos
+                    mouseClicked = True
+                    
+            computerMove = getComputerMove(theBoard, computerLetter, turnCount)
+            makeMove(theBoard, playerLetter, computerMove)
+            turnCount += 1
+            updateGrid(theBoard)
+            if isWinner(theBoard, playerLetter):
+                print("Player has won!")
+                gameIsPlaying = False
+            if isBoardFull(theBoard):
+                print("Its a tie!")
+                gameIsPlaying = False
+            turn = 'computer'
+            FPSCLOCK.tick(FPS)
         else:
             computerMove = getComputerMove(theBoard, computerLetter, turnCount)
             makeMove(theBoard, computerLetter, computerMove)
