@@ -151,13 +151,71 @@ def runGame(playerLetter, computerLetter, turn):
                             turn = 'computer'
                 FPSCLOCK.tick(FPS)
         else:
-            # computerMove(theBoard, computerLetter)
-            print("Computer turn")
-            print("Computer makes turn")
+            computerMove = getComputerMove(theBoard, computerLetter)
+            makeMove(theBoard, computerLetter, computerMove)
+            updateGrid(theBoard)
+            if isWinner(theBoard, computerLetter):
+                print("computer won")
+                gameIsPlaying = False
+            if isBoardFull(theBoard):
+                print("Its a tie")
+                gameIsPlaying = False
             turn = 'player'
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+        
+def getCopyOfBoard(board):
+    copy = []
+    for row in range(3):
+        copy.append(board[row][:])
+    return copy
+            
+def getComputerMove(board, computerLetter):
+    # Given a board and the computer's letter, determine where to move and return that move.
+    if computerLetter == 'X':
+        playerLetter = 'O'
+    else:
+        playerLetter = 'X'
+
+    # 1. Can we win in the next move?
+    for row in range(3):
+        for col in range(3):
+            copy = getCopyOfBoard(board)
+            if isSpaceFree(copy, (row, col)):
+                makeMove(copy, computerLetter, (row, col))
+                if isWinner(copy, computerLetter):
+                    return (row, col)
+    # 2. Can the player win in the next move? Block him!
+    for row in range(3):
+        for col in range(3):
+            copy = getCopyOfBoard(board)
+            if isSpaceFree(copy, (row, col)):
+                makeMove(copy, playerLetter, (row, col))
+                if isWinner(copy, playerLetter):
+                    return (row, col)
+    # 3. I try take one of the corners
+    move = chooseRandomMoveFromList(board, [(0,0), (0,2), (2,0), (2,2)])
+    if move != None:
+        return move
+    # 4. I try to take the center if its free
+    if isSpaceFree(board, (1,1)):
+        return (1,1)
+    # 5. Move on one of the sides
+    return chooseRandomMoveFromList(board, [(1,0),(0,1),(2,1),(1,2)])
+                
+
+def chooseRandomMoveFromList(board, moveList):
+    # Returns a valid move from the passed list on the passed board.
+    # Returns None if there is no valid move.
+    possibleMoves = []
+    for i in moveList:
+        if isSpaceFree(board, i):
+            possibleMoves.append(i)
+    if len(possibleMoves) != 0:
+        return random.choice(possibleMoves)
+    else:
+        return None
 
 def isBoardFull(board):
     for row in range(3):
