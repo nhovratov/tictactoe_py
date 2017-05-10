@@ -5,7 +5,7 @@
 import sys, pygame, random
 from pygame.locals import *
 
-FPS = 30
+FPS = 60
 WINDOWWIDTH = 645
 PADDING = 25
 
@@ -88,7 +88,7 @@ def main():
 
         # Init variables
         turn = whoGoesFirst()
-        playerLetter, computerLetter = playerLetterChoice()
+        playerLetter, computerLetter = ('X', 'O')
 
         printChoiceAndTurn(playerLetter, turn)
         pygame.display.update()
@@ -122,6 +122,7 @@ def playerLetterChoice():
 
 def runGame(playerLetter, computerLetter, turn):
     theBoard = []
+    moves = [turn]
     for i in range(3):
         theBoard.append([' '] * 3)
 
@@ -138,12 +139,16 @@ def runGame(playerLetter, computerLetter, turn):
                     mousex, mousey = event.pos
                     mouseClicked = True
                     
-            computerMove = getComputerMove(theBoard, playerLetter, turnCount)
-            makeMove(theBoard, playerLetter, computerMove)
+            #computerMove = getComputerMove(theBoard, playerLetter, turnCount)
+            randMove = (random.randint(0,2), random.randint(0,2))
+            if isSpaceFree(theBoard, randMove):
+                makeMove(theBoard, playerLetter, randMove)
+                moves.append(randMove)
             turnCount += 1
             updateGrid(theBoard)
             if isWinner(theBoard, playerLetter):
                 print("Player has won!")
+                print(moves)
                 gameIsPlaying = False
             if isBoardFull(theBoard):
                 print("Its a tie!")
@@ -152,6 +157,7 @@ def runGame(playerLetter, computerLetter, turn):
             FPSCLOCK.tick(FPS)
         else:
             computerMove = getComputerMove(theBoard, computerLetter, turnCount)
+            moves.append(computerMove)
             makeMove(theBoard, computerLetter, computerMove)
             turnCount += 1
             updateGrid(theBoard)
