@@ -5,7 +5,7 @@
 import sys, pygame, random
 from pygame.locals import *
 
-FPS = 60
+FPS = 200
 WINDOWWIDTH = 645
 PADDING = 25
 
@@ -149,6 +149,7 @@ def runGame(playerLetter, computerLetter, turn):
             if isWinner(theBoard, playerLetter):
                 print("Player has won!")
                 print(moves)
+                terminate()
                 gameIsPlaying = False
             if isBoardFull(theBoard):
                 print("Its a tie!")
@@ -208,10 +209,17 @@ def getComputerMove(board, computerLetter, turnCount):
             if not isSpaceFree(board, corner):
                 return MIDDLE
     # *2 If the player then sets the opposite corner take a side or else we lose
-    if turnCount == 4 and (
-        (board[0][0] == playerLetter and board[2][2] == playerLetter) or
+    if turnCount == 4:
+        if ((board[0][0] == playerLetter and board[2][2] == playerLetter) or
         (board[2][0] == playerLetter and board[0][2] == playerLetter)):
-        return chooseRandomMoveFromList(board, SIDES)
+            return chooseRandomMoveFromList(board, SIDES)
+        # *3 If the player sets two sides that are adjacent in his first 2 moves set middle or else we lose
+        if ((board[0][1] == playerLetter and board[1][0] == playerLetter) or # Left side and top side
+        (board[1][0] == playerLetter and board[2][1] == playerLetter) or # Top side and right side
+        (board[2][1] == playerLetter and board[1][2] == playerLetter) or # Right side and bottom side
+        (board[1][2] == playerLetter and board[0][1] == playerLetter)): # Bottom side and left side
+            return MIDDLE
+        
         
     # 3. I try take one of the corners
     move = chooseRandomMoveFromList(board, CORNERS)
