@@ -149,10 +149,12 @@ def runGame(playerLetter, computerLetter, turn):
                             turnCount += 1
                             updateGrid(theBoard)
                             if isWinner(theBoard, playerLetter):
-                                print("Player has won!")
+                                showFinishText("Player has won!")
+                                pygame.time.wait(5000)
                                 gameIsPlaying = False
                             if isBoardFull(theBoard):
-                                print("Its a tie!")
+                                showFinishText("It's a tie!")
+                                pygame.time.wait(5000)
                                 gameIsPlaying = False
                             turn = 'computer'
                 FPSCLOCK.tick(FPS)
@@ -162,16 +164,25 @@ def runGame(playerLetter, computerLetter, turn):
             turnCount += 1
             updateGrid(theBoard)
             if isWinner(theBoard, computerLetter):
-                print("computer won")
+                showFinishText("Computer won!")
+                pygame.time.wait(5000)
                 gameIsPlaying = False
             if isBoardFull(theBoard):
-                print("Its a tie")
+                showFinishText("It's a tie!")
+                pygame.time.wait(5000)
                 gameIsPlaying = False
             turn = 'player'
 
         pygame.display.update()
         FPSCLOCK.tick(FPS)
-        
+
+def showFinishText(text):
+    INTERFACE.fill(WHITE)
+    surf, rect = makeTextObjs(text, BASICFONT)
+    INTERFACE.blit(surf, rect)
+    DISPLAYSURF.blit(INTERFACE, UIRECT)
+    pygame.display.update()
+
 def getCopyOfBoard(board):
     copy = []
     for row in range(3):
