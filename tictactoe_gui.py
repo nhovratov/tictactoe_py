@@ -180,13 +180,9 @@ def getComputerMove(board, computerLetter, turnCount):
         playerLetter = 'X'
 
     # 1. Can we win in the next move?
-    for row in range(3):
-        for col in range(3):
-            copy = getCopyOfBoard(board)
-            if isSpaceFree(copy, (row, col)):
-                makeMove(copy, computerLetter, (row, col))
-                if isWinner(copy, computerLetter):
-                    return (row, col)
+    canWin = canWinInNextTurn(board, computerLetter)
+    if canWin:
+        return canWin
     # 2. Can the player win in the next move? Block him!
     for row in range(3):
         for col in range(3):
@@ -201,22 +197,69 @@ def getComputerMove(board, computerLetter, turnCount):
         for corner in CORNERS:
             if not isSpaceFree(board, corner):
                 return MIDDLE
-    # *2 If the player then sets the opposite corner take a side or else we lose
-    if turnCount == 4 and (
-        (board[0][0] == playerLetter and board[2][2] == playerLetter) or
+            
+    # *1.1 If the player then sets the opposite corner take a side or else we lose
+    if turnCount == 4:
+        if ((board[0][0] == playerLetter and board[2][2] == playerLetter) or
         (board[2][0] == playerLetter and board[0][2] == playerLetter)):
-        return chooseRandomMoveFromList(board, SIDES)
+            return chooseRandomMoveFromList(board, SIDES)
+        # *1.2 If the player sets two sides that are adjacent in his first 2 moves set middle or else we lose
+        if ((board[0][1] == playerLetter and board[1][0] == playerLetter) or # Left side and top side
+        (board[1][0] == playerLetter and board[2][1] == playerLetter) or # Top side and right side
+        (board[2][1] == playerLetter and board[1][2] == playerLetter) or # Right side and bottom side
+        (board[1][2] == playerLetter and board[0][1] == playerLetter)): # Bottom side and left side
+            return MIDDLE
+                
+    # 3.1 if we can have a possible win through setting the middle, take the middle
+    if isSpaceFree(board, MIDDLE):
+        copy = getCopyOfBoard(board)
+        makeMove(copy, computerLetter, MIDDLE)
+        if canWinInNextTurn(copy, computerLetter):
+            return MIDDLE
         
-    # 3. I try take one of the corners
-    move = chooseRandomMoveFromList(board, CORNERS)
+    # 3.2 if one of the corner leads to a next turn possible win take this corner
+    for corner in CORNERS:
+        copy = getCopyOfBoard(board)
+        if isSpaceFree(copy, corner):
+            makeMove(copy, computerLetter, corner)
+            if canWinInNextTurn(copy, computerLetter):
+                return corner
+
+    # 3. Try take one of the corners, prioritize corners, on which side a player letter exists
+    corners = []
+    for side in SIDES:
+        if board[side[0]][side[1]] == playerLetter:
+            if side[0] == 0 and side[1] == 1: # Left side
+                corners.extend([(0,0),(0,2)])
+            elif side[0] == 1 and side[1] == 0: # Top side
+                corners.extend([(0,0),(2,0)])
+            elif side[0] == 2 and side[1] == 1: # Right side
+                corners.extend([(2,0),(2,2)])
+            else: # Bottom side
+                corners.extend([(0,2),(2,2)])
+    if not corners:
+        corners = CORNERS[:]
+    move = chooseRandomMoveFromList(board, corners)
     if move != None:
         return move
-    # 4. I try to take the center if its free
+    
+    # 4. Try to take the center if its free
     if isSpaceFree(board, MIDDLE):
         return MIDDLE
+    
     # 5. Move on one of the sides
     return chooseRandomMoveFromList(board, SIDES)
                 
+
+def canWinInNextTurn(board, computerLetter):
+    for row in range(3):
+        for col in range(3):
+            copy = getCopyOfBoard(board)
+            if isSpaceFree(copy, (row, col)):
+                makeMove(copy, computerLetter, (row, col))
+                if isWinner(copy, computerLetter):
+                    return (row, col)
+    return False
 
 def chooseRandomMoveFromList(board, moveList):
     # Returns a valid move from the passed list on the passed board.
